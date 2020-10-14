@@ -1,0 +1,55 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: virtual-kubelet
+  labels:
+    app: virtual-kubelet
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: virtual-kubelet
+  template:
+    metadata:
+      labels:
+        app: virtual-kubelet
+      annotations:
+        iam.amazonaws.com/role: virtual-kubelet
+    spec:
+      serviceAccountName: virtual-kubelet
+      containers:
+      - image: knappek/virtual-kubelet
+        name: virtual-kubelet
+        command:
+        - virtual-kubelet
+        args:
+        - --provider
+        - aws
+        - --provider-config
+        - /config/provider.toml
+        env:
+        - name: KUBELET_PORT
+          value: "10250"
+        - name: APISERVER_CERT_LOCATION
+          value: /etc/virtual-kubelet/cert.pem
+        - name: APISERVER_KEY_LOCATION
+          value: /etc/virtual-kubelet/key.pem
+        - name: VKUBELET_POD_IP
+          value: "virtual-kubelet.default.svc.cluster.local"
+        - name: VK_TAINT_KEY
+          value: aws.amazon.com/fargate
+        volumeMounts:
+        - name: config-volume
+          mountPath: /config
+        - name: credentials
+          mountPath: /etc/virtual-kubelet
+        ports:
+        - name: kubelet
+          containerPort: 10250
+      volumes:
+      - name: credentials
+        secret:
+          secretName: virtual-kubelet
+      - name: config-volume
+        configMap:
+          name: virtual-kubelet

@@ -1,0 +1,13 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: virtual-kubelet
+data:
+  provider.toml: |-
+    Region = "us-west-2"
+    ClusterName = "virtual-kubelet-fargate"
+    CloudWatchLogGroupName = "/ecs/virtual-kubelet-logs"
+    ExecutionRoleArn = "arn:aws:iam::643438024203:role/virtual-kubelet-task-executor"
+    Subnets = [ "subnet-0b7b5711b226b3981", "subnet-01f0567af08c3d7e5", "subnet-047287a7c189ab142" ]
+    SecurityGroups = [ "sg-0e48c8586988dd9e2" ]
+    AssignPublicIPv4Address = true
